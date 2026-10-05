@@ -4,7 +4,7 @@ SRC_DIR  := src
 TEST_DIR := test
 SIM_DIR  := simulation/files
 
-.PHONY: all blink_led uart_baud_generator uart uart_demo uart_demo_phrase uart_demo_leds uart_demo_echo uart_tx uart_rx clean
+.PHONY: all blink_led uart_baud_generator uart uart_demo uart_demo_phrase uart_demo_leds uart_demo_echo uart_tx uart_rx spi spi_fifo spi_fifo_uart spi_debugger clean
 
 all: blink_led uart_baud_generator uart uart_demo
 
@@ -64,6 +64,33 @@ uart_rx: | $(SIM_DIR)
 		./$(TEST_DIR)/tb_uart_rx.v ./$(SRC_DIR)/uart_rx.v
 	$(VVP) $(SIM_DIR)/uart_rx_dsn
 	mv -f ./$(TEST_DIR)/tb_uart_rx.vcd $(SIM_DIR)/uart_rx_simulation.vcd
+
+spi: | $(SIM_DIR)
+	$(IVERILOG) -g2012 -o $(SIM_DIR)/spi_dsn -I ./$(SRC_DIR) \
+		./$(TEST_DIR)/tb_spi.v ./$(SRC_DIR)/spi.v
+	$(VVP) $(SIM_DIR)/spi_dsn
+	mv -f ./$(TEST_DIR)/tb_spi.vcd $(SIM_DIR)/spi_simulation.vcd
+
+spi_fifo: | $(SIM_DIR)
+	$(IVERILOG) -g2012 -o $(SIM_DIR)/spi_fifo_dsn -I ./$(SRC_DIR) \
+		./$(TEST_DIR)/tb_spi_fifo.v ./$(SRC_DIR)/spi.v ./$(SRC_DIR)/async_fifo.v
+	$(VVP) $(SIM_DIR)/spi_fifo_dsn
+	mv -f ./$(TEST_DIR)/tb_spi_fifo.vcd $(SIM_DIR)/spi_fifo_simulation.vcd
+
+spi_fifo_uart: | $(SIM_DIR)
+	$(IVERILOG) -g2012 -o $(SIM_DIR)/spi_fifo_uart_dsn -I ./$(SRC_DIR) \
+		./$(TEST_DIR)/tb_spi_fifo_uart.v ./$(SRC_DIR)/spi_fifo_uart.v
+	$(VVP) $(SIM_DIR)/spi_fifo_uart_dsn
+	mv -f ./$(TEST_DIR)/tb_spi_fifo_uart.vcd $(SIM_DIR)/spi_fifo_uart_simulation.vcd
+
+spi_debugger: | $(SIM_DIR)
+	$(IVERILOG) -g2012 -o $(SIM_DIR)/spi_debugger_dsn -I ./$(SRC_DIR) \
+		./$(TEST_DIR)/tb_spi_debugger.v ./$(SRC_DIR)/spi_debugger.v \
+		./$(SRC_DIR)/spi.v ./$(SRC_DIR)/async_fifo.v \
+		./$(SRC_DIR)/spi_fifo_uart.v ./$(SRC_DIR)/uart.v \
+		./$(SRC_DIR)/uart_tx.v ./$(SRC_DIR)/uart_rx.v
+	$(VVP) $(SIM_DIR)/spi_debugger_dsn
+	mv -f ./$(TEST_DIR)/tb_spi_debugger.vcd $(SIM_DIR)/spi_debugger_simulation.vcd
 
 clean:
 	rm -f $(SIM_DIR)/*

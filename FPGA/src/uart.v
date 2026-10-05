@@ -35,7 +35,7 @@ uart_rx #(
     ) TX_module (
         .clk(clk),
         .rst_n(rst_n),
-        .data(tx_data),
+        .data(data_tx),
         .send(tx_send),
         .tx(tx),
         .busy(tx_busy),
